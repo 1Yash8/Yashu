@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define MAX_ITEMS 100
+
+typedef struct {
+    int weight;
+    int value;
+} LuggageItem;
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+void knapsack_airport(LuggageItem items[], int n, int max_weight) {
+    int dp[n + 1][max_weight + 1];
+    int selected_items[MAX_ITEMS] = {0}; // Array to store selected items
+
+    // Initialize DP table
+    for (int i = 0; i <= n; i++) {
+        for (int w = 0; w <= max_weight; w++) {
+            if (i == 0 || w == 0)
+                dp[i][w] = 0;
+            else if (items[i - 1].weight <= w)
+                dp[i][w] = max(items[i - 1].value + dp[i - 1][w - items[i - 1].weight], dp[i - 1][w]);
+            else
+                dp[i][w] = dp[i - 1][w];
+        }
+    }
+
+    // Backtrack to find selected items
+    int total_weight = max_weight;
+    for (int i = n; i > 0 && total_weight > 0; i--) {
+        if (dp[i][total_weight] != dp[i - 1][total_weight]) {
+            selected_items[i - 1] = 1;
+            total_weight -= items[i - 1].weight;
+        }
+    }
+
+    printf("Selected items:\n");
+    for (int i = 0; i < n; i++) {
+        if (selected_items[i])
+            printf("Weight: %d, Value: %d\n", items[i].weight, items[i].value);
+    }
+}
+
+int main() {
+    int n, max_weight;
+
+    printf("Enter the number of luggage items: ");
+    scanf("%d", &n);
+
+    LuggageItem items[n];
+
+    printf("Enter the weights and values of the luggage items:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Weight of item %d: ", i+1);
+        scanf("%d", &items[i].weight);
+        printf("Value of item %d: ", i+1);
+        scanf("%d", &items[i].value);
+    }
+
+    printf("Enter the maximum weight limit for the luggage compartment: ");
+    scanf("%d", &max_weight);
+
+    printf("Selected items for the luggage compartment:\n");
+    knapsack_airport(items, n, max_weight);
+
+    return 0;
+}
